@@ -6,5 +6,5 @@ interface SessionData {
 }
 
 export interface IBotContext extends Context {
-  session: SessionData;
+  sessionData: SessionData;
 }

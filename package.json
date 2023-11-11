@@ -12,7 +12,7 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "dev": "yarn run build && nodemon",
-    "start": "yarn run build && node ./dist/app.js",
+    "prod": "yarn run build && node ./dist/app.js",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "yarn prettier './src/**/*.ts' --write"
@@ -33,11 +33,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@telegraf/session": "^2.0.0-beta.6",
     "dotenv": "^16.3.1",
     "eslint-plugin-prettier": "^5.0.1",
     "inversify": "^6.0.2",
-    "mongodb": "^5.9.1",
+    "mongodb": "^6.2.0",
     "reflect-metadata": "^0.1.13",
     "telegraf": "^4.15.0"
   }
