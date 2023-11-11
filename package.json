@@ -12,7 +12,7 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "dev": "yarn run build && nodemon",
-    "start": "yarn run build && node ./dist/app.js",
+    "prod": "yarn run build && node ./dist/app.js",
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "yarn prettier './src/**/*.ts' --write"
