@@ -5,6 +5,7 @@ import { IBotContext } from '../context/context.interface';
 import { Command } from './command';
 
 export class StartCommand extends Command {
+  name = StartCommand.name;
   constructor(bot: Telegraf<IBotContext>) {
     super(bot);
   }
