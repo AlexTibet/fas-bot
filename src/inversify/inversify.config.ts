@@ -8,6 +8,10 @@ import SESSION_TYPES from '../session/session.types';
 import { ISessionStoreService } from '../session/session.store.service.interface';
 import { SessionStoreService } from '../session/session.store.service';
 
+import UTILS_TYPES from '../utils/utils.types';
+import { ILogger } from '../utils/logger/logger.interface';
+import { LoggerService } from '../utils/logger/logger.service';
+
 const container = new Container();
 
 /** Config */
@@ -18,4 +22,6 @@ container
   .bind<ISessionStoreService>(SESSION_TYPES.ISessionStoreService)
   .to(SessionStoreService);
 
+/** Utils */
+container.bind<ILogger>(UTILS_TYPES.ILogger).to(LoggerService);
 export default container;

@@ -11,11 +11,15 @@ import { IConfigService } from './config/config.service.interface';
 import SESSION_TYPES from './session/session.types';
 import { ISessionStoreService } from './session/session.store.service.interface';
 
+import UTILS_TYPES from './utils/utils.types';
+import { ILogger } from './utils/logger/logger.interface';
+
 import container from './inversify/inversify.config';
 
 class App {
   private readonly bot: Telegraf<IBotContext>;
   private readonly commands: ICommand[];
+  private readonly logger: ILogger;
 
   constructor() {
     const configService = container.get<IConfigService>(
@@ -33,17 +37,30 @@ class App {
     );
 
     this.bot.use(session({ store: storeService.getStore() }));
+
+    this.logger = container.get<ILogger>(UTILS_TYPES.ILogger);
   }
 
   public async init(): Promise<void> {
+    this.logger.info('INIT');
+
     for (const command of this.commands) {
       command.handle();
+      this.logger.info(`Add command: ${command.name}`);
+      this.logger.error('Test');
     }
 
     process.once('SIGINT', () => this.bot.stop('SIGINT'));
     process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
 
-    await this.bot.launch();
+    try {
+      this.logger.info('Bot launch');
+      await this.bot.launch();
+    } catch (e) {
+      this.logger.error('Error', { e });
+
+      throw e;
+    }
   }
 }
 
@@ -51,7 +68,6 @@ const app = new App();
 
 (async function (): Promise<void> {
   try {
-    console.log('Init app');
     await app.init();
   } catch (e) {
     console.log(e);
