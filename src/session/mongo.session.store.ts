@@ -2,11 +2,11 @@ import { MongoClient, Collection } from 'mongodb';
 
 import { IConfigService } from '../config/config.service.interface';
 
-import { IBotContext } from '../context/context.interface';
+import { ISessionData } from '../context/context.interface';
 
 interface ISessionCollections {
   key: string;
-  session: IBotContext;
+  session: ISessionData;
 }
 
 export class MongoSessionStore {
@@ -22,14 +22,16 @@ export class MongoSessionStore {
       .collection<ISessionCollections>('telegramm-sessions');
   }
 
-  async get(key: string): Promise<IBotContext | undefined> {
+  async get(key: string): Promise<ISessionData | undefined> {
+    console.log('MongoSessionStore: ', this.get.name, key);
     await this._connection;
     const collection = await this._collection.findOne({ key });
 
     return collection?.session;
   }
 
-  async set(key: string, session: IBotContext): Promise<void> {
+  async set(key: string, session: ISessionData): Promise<void> {
+    console.log('MongoSessionStore: ', this.set.name, key, session);
     await this._connection;
     await this._collection.updateOne(
       { key },

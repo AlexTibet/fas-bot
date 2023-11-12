@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { SessionStore } from 'telegraf';
 
-import { IBotContext } from '../context/context.interface';
+import { ISessionData } from '../context/context.interface';
 
 import CONFIG_TYPES from '../config/config.types';
 import { IConfigService } from '../config/config.service.interface';
@@ -16,7 +16,7 @@ export class SessionStoreService implements ISessionStoreService {
     private readonly config: IConfigService,
   ) {}
 
-  getStore(): SessionStore<IBotContext> {
+  getStore(): SessionStore<ISessionData> {
     return new MongoSessionStore(this.config);
   }
 }

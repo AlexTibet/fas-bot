@@ -1,10 +1,11 @@
-import { Context } from 'telegraf';
+import type { Context } from 'telegraf';
+import type { Update } from 'telegraf/types';
 
-interface SessionData {
-  firstSessionData: string;
-  secondSessionData: string;
+export interface ISessionData {
+  firstSessionData?: boolean;
+  secondSessionData?: boolean;
 }
 
-export interface IBotContext extends Context {
-  sessionData: SessionData;
+export interface IBotContext<U extends Update = Update> extends Context<U> {
+  session: ISessionData;
 }

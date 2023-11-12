@@ -1,6 +1,6 @@
 import { session, Telegraf } from 'telegraf';
 
-import { IBotContext } from './context/context.interface';
+import { IBotContext, ISessionData } from './context/context.interface';
 
 import { ICommand } from './commands/command.interface';
 import { StartCommand } from './commands/start.command';
@@ -17,47 +17,47 @@ import { ILogger } from './utils/logger/logger.interface';
 import container from './inversify/inversify.config';
 
 class App {
-  private readonly bot: Telegraf<IBotContext>;
-  private readonly commands: ICommand[];
-  private readonly logger: ILogger;
+  private readonly _configService: IConfigService;
+  private readonly _storeService: ISessionStoreService;
+  private readonly _loggerService: ILogger;
 
   constructor() {
-    const configService = container.get<IConfigService>(
+    this._configService = container.get<IConfigService>(
       CONFIG_TYPES.IConfigService,
     );
-
-    this.bot = new Telegraf<IBotContext>(
-      configService.get('TELEGRAMM_API_KEY'),
-    );
-
-    this.commands = [new StartCommand(this.bot)];
-
-    const storeService = container.get<ISessionStoreService>(
+    this._storeService = container.get<ISessionStoreService>(
       SESSION_TYPES.ISessionStoreService,
     );
-
-    this.bot.use(session({ store: storeService.getStore() }));
-
-    this.logger = container.get<ILogger>(UTILS_TYPES.ILogger);
+    this._loggerService = container.get<ILogger>(UTILS_TYPES.ILogger);
   }
 
   public async init(): Promise<void> {
-    this.logger.info('INIT');
+    this._loggerService.info('INIT');
+    const bot = new Telegraf<IBotContext>(
+      this._configService.get('TELEGRAMM_API_KEY'),
+    );
 
-    for (const command of this.commands) {
+    bot.use(
+      session<ISessionData, IBotContext, 'session'>({
+        store: this._storeService.getStore(),
+      }),
+    );
+
+    const commands: ICommand[] = [new StartCommand(bot)];
+
+    for (const command of commands) {
       command.handle();
-      this.logger.info(`Add command: ${command.name}`);
-      this.logger.error('Test');
+      this._loggerService.info(`Add command: ${command.name}`);
     }
 
-    process.once('SIGINT', () => this.bot.stop('SIGINT'));
-    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
+    process.once('SIGINT', () => bot.stop('SIGINT'));
+    process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
     try {
-      this.logger.info('Bot launch');
-      await this.bot.launch();
+      this._loggerService.info('Bot launch');
+      await bot.launch();
     } catch (e) {
-      this.logger.error('Error', { e });
+      this._loggerService.error('Error', { e });
 
       throw e;
     }
