@@ -45,19 +45,19 @@ export class LoggerService implements ILogger {
     return options;
   }
 
-  log(message: string, meta?: object): void {
-    this._logger.log('debug', message, meta);
+  log(message: string): void {
+    this._logger.log('debug', message);
   }
 
-  info(message: string, meta?: object): void {
-    this._logger.log('info', message, meta);
+  info(message: string): void {
+    this._logger.log('info', message);
   }
 
-  warn(message: string, meta?: object): void {
-    this._logger.log('warn', message, meta);
+  warn(message: string, meta: object): void {
+    this._logger.log('warn', `${message} - ${JSON.stringify(meta)}`);
   }
 
-  error(message: string, meta?: object): void {
-    this._logger.log('error', message, meta);
+  error(message: string, meta: object): void {
+    this._logger.log('error', `${message} - ${JSON.stringify(meta)}`);
   }
 }
