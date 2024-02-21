@@ -1,11 +1,17 @@
-import type { Context } from 'telegraf';
-import type { Update } from 'telegraf/types';
+import { Context, Scenes } from 'telegraf';
+import type { User } from 'telegraf/types';
 
-export interface ISessionData {
-  firstSessionData?: boolean;
-  secondSessionData?: boolean;
+interface ISceneSession extends Scenes.SceneSessionData {
+  // will be available under `ctx.scene.session.mySceneSessionProp`
+  mySceneSessionProp: number;
 }
 
-export interface IBotContext<U extends Update = Update> extends Context<U> {
+export interface ISessionData extends Scenes.SceneSession<ISceneSession> {
+  user?: User;
+  currency?: string;
+}
+
+export interface IBotContext extends Context {
   session: ISessionData;
+  scene: Scenes.SceneContextScene<IBotContext, ISceneSession>;
 }

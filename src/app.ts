@@ -3,7 +3,7 @@ import { session, Telegraf } from 'telegraf';
 import { IBotContext, ISessionData } from './context/context.interface';
 
 import { ICommand } from './commands/command.interface';
-import { StartCommand } from './commands/start.command';
+import { StartCommand } from './commands/start/start.command';
 
 import CONFIG_TYPES from './config/config.types';
 import { IConfigService } from './config/config.service.interface';
@@ -15,6 +15,7 @@ import UTILS_TYPES from './utils/utils.types';
 import { ILogger } from './utils/logger/logger.interface';
 
 import container from './inversify/inversify.config';
+import { AddExpensesStage } from './scenes/add-expenses/add.expenses.stage';
 
 class App {
   private readonly _configService: IConfigService;
@@ -34,7 +35,7 @@ class App {
   public async init(): Promise<void> {
     this._loggerService.info('INIT');
     const bot = new Telegraf<IBotContext>(
-      this._configService.get('TELEGRAMM_API_KEY'),
+      this._configService.get('TELEGRAM_API_KEY'),
     );
 
     bot.use(
@@ -42,6 +43,10 @@ class App {
         store: this._storeService.getStore(),
       }),
     );
+
+    const stage = new AddExpensesStage();
+
+    bot.use(stage.middleware());
 
     const commands: ICommand[] = [new StartCommand(bot)];
 
@@ -70,6 +75,6 @@ const app = new App();
   try {
     await app.init();
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 })();

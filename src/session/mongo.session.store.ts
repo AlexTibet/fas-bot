@@ -1,4 +1,4 @@
-import { MongoClient, Collection } from 'mongodb';
+import { Collection, MongoClient } from 'mongodb';
 
 import { IConfigService } from '../config/config.service.interface';
 
@@ -19,7 +19,7 @@ export class MongoSessionStore {
     this._connection = this._client.connect();
     this._collection = this._client
       .db('fas-bot')
-      .collection<ISessionCollections>('telegramm-sessions');
+      .collection<ISessionCollections>('telegram-sessions');
   }
 
   async get(key: string): Promise<ISessionData | undefined> {
