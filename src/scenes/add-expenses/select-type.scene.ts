@@ -1,38 +1,43 @@
-import { Markup, Scenes } from 'telegraf';
-import { IBotContext } from '../../context/context.interface';
-import { AddExpensesSceneNames } from './add-expenses.constants';
-import { ReplyKeyboardMarkup } from '@telegraf/types/markup';
+import { Markup } from 'telegraf';
 import type { Message } from 'telegraf/types';
+import { ReplyKeyboardMarkup } from '@telegraf/types/markup';
 
-export class SelectTypeScene {
-  private readonly _scene: Scenes.BaseScene<IBotContext>;
+import { IBotContext } from '../../context/context.interface';
+
+import { BaseScene } from '../base.scene';
+
+import { AddExpensesSceneNames } from './add-expenses.constants';
+
+export class SelectTypeScene extends BaseScene {
   constructor() {
-    this._scene = new Scenes.BaseScene<IBotContext>(
-      AddExpensesSceneNames.SELECT_TYPE,
-    );
+    super(AddExpensesSceneNames.SELECT_TYPE);
     this.init();
   }
 
-  public get scene(): Scenes.BaseScene<IBotContext> {
-    return this._scene;
-  }
-
-  private init(): void {
+  public init(): void {
     this._scene.enter((ctx: IBotContext) => this.enter(ctx));
+    this._scene.leave((ctx: IBotContext) => this.leave(ctx));
     this._scene.on('message', (ctx: IBotContext) => this.valueHandler(ctx));
   }
 
-  private async enter(ctx: IBotContext): Promise<void> {
+  protected async enter(ctx: IBotContext): Promise<void> {
+    await super.enter(ctx);
     const keyboard = this.createTypesKeyboard();
+    const _msg = await ctx.reply('Какой тип траты?', keyboard);
 
-    await ctx.reply('Какой тип траты?', keyboard);
+    this.addMsgId(ctx, _msg.message_id);
   }
 
   private async valueHandler(ctx: IBotContext): Promise<void> {
-    const message = <Message.TextMessage>ctx.message;
+    const msg = <Message.TextMessage>ctx.message;
 
-    console.log(message.text);
-    await ctx.reply(`Тип: ${message.text}\n Готово.`);
+    ctx.session.sceneData.addExpenses.type = msg.text;
+
+    const _msg = await ctx.reply(`Тип: ${msg.text}\n Готово.`);
+
+    this.addMsgId(ctx, msg.message_id);
+    this.addMsgId(ctx, _msg.message_id);
+
     await ctx.scene.leave();
   }
 

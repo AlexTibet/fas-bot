@@ -1,36 +1,52 @@
-import { Scenes } from 'telegraf';
 import type { Message } from 'telegraf/types';
 
 import { IBotContext } from '../../context/context.interface';
 import { AddExpensesSceneNames } from './add-expenses.constants';
+import { BaseScene } from '../base.scene';
 
-export class AddValueScene {
-  private readonly _scene: Scenes.BaseScene<IBotContext>;
+export class AddValueScene extends BaseScene {
   constructor() {
-    this._scene = new Scenes.BaseScene<IBotContext>(
-      AddExpensesSceneNames.ADD_VALUE,
-    );
+    super(AddExpensesSceneNames.ADD_VALUE);
     this.init();
   }
 
-  public get scene(): Scenes.BaseScene<IBotContext> {
-    return this._scene;
-  }
-
-  private init(): void {
+  init(): void {
     this._scene.enter((ctx: IBotContext) => this.enter(ctx));
+    this._scene.leave((ctx: IBotContext) => this.leave(ctx));
     this._scene.on('message', (ctx: IBotContext) => this.valueHandler(ctx));
   }
 
-  private async enter(ctx: IBotContext): Promise<void> {
-    await ctx.reply('Введите сумму:');
+  protected async enter(ctx: IBotContext): Promise<void> {
+    await super.enter(ctx);
+    const msg = await ctx.reply('Введите число');
+
+    this.addMsgId(ctx, msg.message_id);
+  }
+  private async valueHandler(ctx: IBotContext): Promise<void> {
+    const msg = <Message.TextMessage>ctx.message;
+
+    this.addMsgId(ctx, msg.message_id);
+
+    try {
+      const value = Number(msg.text);
+
+      ctx.session.sceneData.addExpenses.value = value;
+
+      const _msg = await ctx.reply(
+        `Добавляю ${value} ${ctx.session.currency || ''}`,
+      );
+
+      this.addMsgId(ctx, _msg.message_id);
+      await ctx.scene.enter(AddExpensesSceneNames.SELECT_TYPE);
+    } catch (err) {
+      console.log(err);
+      await this.errorHandler(ctx);
+    }
   }
 
-  private async valueHandler(ctx: IBotContext): Promise<void> {
-    const message = <Message.TextMessage>ctx.message;
+  private async errorHandler(ctx: IBotContext): Promise<void> {
+    const _msg = await ctx.reply('Значение должно быть числом');
 
-    console.log(message.text);
-    await ctx.reply(`Добавляю ${message.text} ${ctx.session.currency || ''}`);
-    await ctx.scene.enter(AddExpensesSceneNames.SELECT_TYPE);
+    this.addMsgId(ctx, _msg.message_id);
   }
 }

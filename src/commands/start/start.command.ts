@@ -2,9 +2,10 @@ import { Markup, Telegraf } from 'telegraf';
 import { InlineKeyboardMarkup } from '@telegraf/types/markup';
 
 import { IBotContext } from '../../context/context.interface';
+import { AddExpensesSceneNames } from '../../scenes/add-expenses/add-expenses.constants';
+import { defaultKeyboard } from '../../utils/default.keyboard';
 
 import { Command } from '../command';
-import { AddExpensesSceneNames } from '../../scenes/add-expenses/add-expenses.constants';
 
 export class StartCommand extends Command {
   name = StartCommand.name;
@@ -22,15 +23,26 @@ export class StartCommand extends Command {
   }
 
   private async process(ctx: IBotContext): Promise<void> {
-    ctx.session ??= { user: ctx.from };
+    if (!ctx.session) {
+      ctx.session = { user: ctx.from, sceneData: { addExpenses: {} } };
+    }
+
+    if (!ctx.session.sceneData) {
+      ctx.session.sceneData = { addExpenses: {} };
+    }
+
     const keyboard = this.createStartKeyboard();
 
+    await ctx.reply('FAS-Bot', defaultKeyboard);
     await ctx.reply(`Привет ${ctx.session.user?.first_name || '!'}`, keyboard);
   }
 
   private createStartKeyboard(): Markup.Markup<InlineKeyboardMarkup> {
     return Markup.inlineKeyboard(
-      [Markup.button.callback('Добавить расходы', 'add_expenses_callback')],
+      [
+        Markup.button.callback('Добавить расходы', 'add_expenses_callback'),
+        Markup.button.callback('Показать расходы', 'get_expenses_callback'),
+      ],
       { columns: 1 },
     );
   }
