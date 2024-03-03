@@ -5,22 +5,31 @@ import {
   createLogger,
   LoggerOptions,
 } from 'winston';
+import { injectable } from 'inversify';
+
+import container from '../../inversify/inversify.config';
+
+import { IConfigService } from '../../config/config.service.interface';
+import CONFIG_TYPES from '../../config/config.types';
 
 import { ILogger } from './logger.interface';
-import { injectable } from 'inversify';
 
 @injectable()
 export class LoggerService implements ILogger {
   private readonly _logger: Logger;
+  private readonly _config: IConfigService;
 
   constructor() {
+    this._config = container.get<IConfigService>(CONFIG_TYPES.IConfigService);
     const options = this._createLoggerOptions();
 
     this._logger = createLogger(options);
   }
 
   private _createLoggerOptions(): LoggerOptions {
-    const options: LoggerOptions = {};
+    const options: LoggerOptions = {
+      level: this._config.get('LOGGING_LEVEL'),
+    };
 
     options.format = format.combine(
       format.colorize({ all: true }),
