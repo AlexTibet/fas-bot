@@ -5,6 +5,9 @@ import { IBotContext, ISessionData } from './context/context.interface';
 import { ICommand } from './commands/command.interface';
 import { StartCommand } from './commands/start/start.command';
 
+import { AddExpensesStage } from './scenes/add-expenses/add.expenses.stage';
+import { IStage } from './scenes/stage.interface';
+
 import CONFIG_TYPES from './config/config.types';
 import { IConfigService } from './config/config.service.interface';
 
@@ -15,7 +18,6 @@ import UTILS_TYPES from './utils/utils.types';
 import { ILogger } from './utils/logger/logger.interface';
 
 import container from './inversify/inversify.config';
-import { AddExpensesStage } from './scenes/add-expenses/add.expenses.stage';
 
 class App {
   private readonly _configService: IConfigService;
@@ -44,15 +46,20 @@ class App {
       }),
     );
 
-    const stage = new AddExpensesStage();
-
-    bot.use(stage.middleware());
-
+    // Add commands
     const commands: ICommand[] = [new StartCommand(bot)];
 
     for (const command of commands) {
       command.handle();
       this._loggerService.info(`Add command: ${command.name}`);
+    }
+
+    // Add stages
+    const stages: IStage[] = [new AddExpensesStage()];
+
+    for (const stage of stages) {
+      bot.use(stage.middleware());
+      this._loggerService.info(`Add stage: ${stage.name}`);
     }
 
     process.once('SIGINT', () => bot.stop('SIGINT'));

@@ -9,7 +9,9 @@ import { SelectTypeScene } from './select-type.scene';
 import { AddCommentScene } from './add-comment.scene';
 
 export class AddExpensesStage implements IStage {
+  public name = AddExpensesStage.name;
   private readonly _stage: Scenes.Stage<IBotContext>;
+
   constructor() {
     const addValue = new AddValueScene();
     const selectType = new SelectTypeScene();
