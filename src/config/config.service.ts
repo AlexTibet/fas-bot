@@ -27,7 +27,7 @@ export class ConfigService implements IConfigService {
     const value = this.config[key];
 
     if (!value) {
-      throw new Error(CONFIG_ERRORS.keyNotFound);
+      throw new Error(`${CONFIG_ERRORS.keyNotFound}: ${key}`);
     }
 
     return value;

@@ -1,20 +1,31 @@
 import { Scenes } from 'telegraf';
+
 import { IBotContext } from '../context/context.interface';
+
+import container from '../inversify/inversify.config';
+
+import { ILogger } from '../utils/logger/logger.interface';
+import UTILS_TYPES from '../utils/utils.types';
 
 export abstract class BaseScene {
   protected readonly _scene: Scenes.BaseScene<IBotContext>;
+  protected readonly _logger: ILogger;
 
   protected constructor(name: string) {
     this._scene = new Scenes.BaseScene<IBotContext>(name);
+    this._logger = container.get<ILogger>(UTILS_TYPES.ILogger);
   }
 
-  public abstract init(): void;
+  protected abstract init(): void;
 
   public get scene(): Scenes.BaseScene<IBotContext> {
     return this._scene;
   }
 
   protected async enter(ctx: IBotContext): Promise<void> {
+    this._logger.log(
+      `Scene: ${this._scene.id} - enter(), ${JSON.stringify(ctx.session)}`,
+    );
     ctx.scene.session.messageIds = [];
   }
 
@@ -23,7 +34,11 @@ export abstract class BaseScene {
       await ctx.deleteMessage(id);
     }
 
-    // await ctx.reply(ctx.scene.session.leaveText, defaultKeyboard);
+    this._logger.log(
+      `Scene: ${this._scene.id} - leave(), ${JSON.stringify(
+        ctx.session.sceneData,
+      )}`,
+    );
   }
 
   protected addMsgId(ctx: IBotContext, id: number): void {

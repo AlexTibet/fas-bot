@@ -23,7 +23,7 @@ export class SelectTypeScene extends BaseScene {
   protected async enter(ctx: IBotContext): Promise<void> {
     await super.enter(ctx);
     const keyboard = this.createTypesKeyboard();
-    const _msg = await ctx.reply('Какой тип траты?', keyboard);
+    const _msg = await ctx.reply('Какой тип расходов?', keyboard);
 
     this.addMsgId(ctx, _msg.message_id);
   }
@@ -31,17 +31,16 @@ export class SelectTypeScene extends BaseScene {
   private async valueHandler(ctx: IBotContext): Promise<void> {
     const msg = <Message.TextMessage>ctx.message;
 
+    this.addMsgId(ctx, msg.message_id);
+
+    // TODO: check msg.text in array of types from user data
     ctx.session.sceneData.addExpenses.type = msg.text;
 
-    const _msg = await ctx.reply(`Тип: ${msg.text}\n Готово.`);
-
-    this.addMsgId(ctx, msg.message_id);
-    this.addMsgId(ctx, _msg.message_id);
-
-    await ctx.scene.leave();
+    await ctx.scene.enter(AddExpensesSceneNames.ADD_COMMENT);
   }
 
   private createTypesKeyboard(): Markup.Markup<ReplyKeyboardMarkup> {
+    // TODO: get types from array of types from user data
     return Markup.keyboard(
       [
         Markup.button.text('Еда'),

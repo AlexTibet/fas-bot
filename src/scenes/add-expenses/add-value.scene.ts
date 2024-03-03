@@ -18,7 +18,8 @@ export class AddValueScene extends BaseScene {
 
   protected async enter(ctx: IBotContext): Promise<void> {
     await super.enter(ctx);
-    const msg = await ctx.reply('Введите число');
+    ctx.session.sceneData.addExpenses = {};
+    const msg = await ctx.reply('Введите число:');
 
     this.addMsgId(ctx, msg.message_id);
   }
@@ -28,15 +29,7 @@ export class AddValueScene extends BaseScene {
     this.addMsgId(ctx, msg.message_id);
 
     try {
-      const value = Number(msg.text);
-
-      ctx.session.sceneData.addExpenses.value = value;
-
-      const _msg = await ctx.reply(
-        `Добавляю ${value} ${ctx.session.currency || ''}`,
-      );
-
-      this.addMsgId(ctx, _msg.message_id);
+      ctx.session.sceneData.addExpenses.value = Number(msg.text);
       await ctx.scene.enter(AddExpensesSceneNames.SELECT_TYPE);
     } catch (err) {
       console.log(err);

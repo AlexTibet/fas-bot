@@ -43,7 +43,7 @@ services:
       - .:/app
       - /app/node_modules
     ports: 
-      - '5000:5000'
+      - '3000:3000'
     external_links: 
       - mongo-db
     command: yarn dev
