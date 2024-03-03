@@ -46,20 +46,20 @@ class App {
       }),
     );
 
-    // Add commands
-    const commands: ICommand[] = [new StartCommand(bot)];
-
-    for (const command of commands) {
-      command.handle();
-      this._loggerService.info(`Add command: ${command.name}`);
-    }
-
     // Add stages
     const stages: IStage[] = [new AddExpensesStage()];
 
     for (const stage of stages) {
       bot.use(stage.middleware());
       this._loggerService.info(`Add stage: ${stage.name}`);
+    }
+
+    // Add commands
+    const commands: ICommand[] = [new StartCommand(bot)];
+
+    for (const command of commands) {
+      command.handle();
+      this._loggerService.info(`Add command: ${command.name}`);
     }
 
     process.once('SIGINT', () => bot.stop('SIGINT'));
