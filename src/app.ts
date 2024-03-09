@@ -35,7 +35,7 @@ class App {
   }
 
   public async init(): Promise<void> {
-    this._loggerService.info('INIT');
+    this._loggerService.info('App init');
     const bot = new Telegraf<IBotContext>(
       this._configService.get('TELEGRAM_API_KEY'),
     );

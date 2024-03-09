@@ -24,7 +24,7 @@ export abstract class BaseScene {
 
   protected async enter(ctx: IBotContext): Promise<void> {
     this._logger.log(
-      `Scene: ${this._scene.id} - enter(), ${JSON.stringify(ctx.session)}`,
+      `[Scenes]: ${this._scene.id} - enter(), ${JSON.stringify(ctx.session)}`,
     );
     ctx.scene.session.messageIds = [];
   }
@@ -35,7 +35,7 @@ export abstract class BaseScene {
     }
 
     this._logger.log(
-      `Scene: ${this._scene.id} - leave(), ${JSON.stringify(
+      `[Scenes]: ${this._scene.id} - leave(), ${JSON.stringify(
         ctx.session.sceneData,
       )}`,
     );

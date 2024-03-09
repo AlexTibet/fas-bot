@@ -54,11 +54,15 @@ export class LoggerService implements ILogger {
     return options;
   }
 
-  log(message: string): void {
+  log(message: string, meta?: object): void {
+    if (meta) message += JSON.stringify(meta);
+
     this._logger.log('debug', message);
   }
 
-  info(message: string): void {
+  info(message: string, meta?: object): void {
+    if (meta) message += JSON.stringify(meta);
+
     this._logger.log('info', message);
   }
 
