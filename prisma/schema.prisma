@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id   String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tId  Int     @unique @map("t_id")
+  name String? @db.VarChar(50)
+
+  expenses     Expense[]
+  expenseTypes ExpenseType[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@index([tId])
+  @@map("users")
+}
+
+model ExpenseType {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @db.VarChar(50)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @db.Uuid
+
+  expenses Expense[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([name])
+  @@map("expense_types")
+}
+
+model Expense {
+  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  value   Decimal  @db.Money
+  comment String?  @db.VarChar(200)
+  date    DateTime @db.Timestamptz()
+
+  type   ExpenseType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  typeId String      @map("type_id") @db.Uuid
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@index([userId])
+  @@index([typeId])
+  @@map("expenses")
+}
