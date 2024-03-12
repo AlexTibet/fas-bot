@@ -4,15 +4,20 @@ import { IBotContext } from '../context/context.interface';
 
 import container from '../inversify/inversify.config';
 
+import { IPrismaService } from '../prisma/prisma.interface';
+import PRISMA_TYPES from '../prisma/prisma.types';
+
 import { ILogger } from '../utils/logger/logger.interface';
 import UTILS_TYPES from '../utils/utils.types';
 
 export abstract class BaseScene {
   protected readonly _scene: Scenes.BaseScene<IBotContext>;
+  protected readonly _prisma: IPrismaService;
   protected readonly _logger: ILogger;
 
   protected constructor(name: string) {
     this._scene = new Scenes.BaseScene<IBotContext>(name);
+    this._prisma = container.get<IPrismaService>(PRISMA_TYPES.IPrismaService);
     this._logger = container.get<ILogger>(UTILS_TYPES.ILogger);
   }
 

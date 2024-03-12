@@ -4,6 +4,8 @@ import { ReplyKeyboardMarkup } from '@telegraf/types/markup';
 
 import { IBotContext } from '../../context/context.interface';
 
+import { IExpenseType } from '../../prisma/prisma.interface';
+
 import { BaseScene } from '../base.scene';
 
 import { AddExpensesSceneNames } from './add-expenses.constants';
@@ -22,7 +24,7 @@ export class SelectTypeScene extends BaseScene {
 
   protected async enter(ctx: IBotContext): Promise<void> {
     await super.enter(ctx);
-    const keyboard = this.createTypesKeyboard();
+    const keyboard = this.createTypesKeyboard(ctx.session.user.expenseTypes);
     const _msg = await ctx.reply('Какой тип расходов?', keyboard);
 
     this.addMsgId(ctx, _msg.message_id);
@@ -33,22 +35,33 @@ export class SelectTypeScene extends BaseScene {
 
     this.addMsgId(ctx, msg.message_id);
 
-    // TODO: check msg.text in array of types from user data
-    ctx.session.sceneData.addExpenses.type = msg.text;
+    const type = await this._prisma.findExpenseTypeByName(
+      ctx.session.user.id,
+      msg.text,
+    );
 
-    await ctx.scene.enter(AddExpensesSceneNames.ADD_COMMENT);
+    if (!type) {
+      const keyboard = this.createTypesKeyboard(ctx.session.user.expenseTypes);
+      const _msg = await ctx.reply(
+        `Неизвестный тип: ${msg.text}\nНужно указать существующий тип.`,
+        keyboard,
+      );
+
+      this.addMsgId(ctx, _msg.message_id);
+
+      return;
+    }
+
+    ctx.session.sceneData.addExpenses.type = type;
+
+    await ctx.scene.enter(AddExpensesSceneNames.SELECT_DATE);
   }
 
-  private createTypesKeyboard(): Markup.Markup<ReplyKeyboardMarkup> {
-    // TODO: get types from array of types from user data
-    return Markup.keyboard(
-      [
-        Markup.button.text('Еда'),
-        Markup.button.text('Транспорт'),
-        Markup.button.text('Развлечения'),
-        Markup.button.text('Прочее'),
-      ],
-      { columns: 3 },
-    );
+  private createTypesKeyboard(
+    types: IExpenseType[],
+  ): Markup.Markup<ReplyKeyboardMarkup> {
+    const buttons = types.map((type) => Markup.button.text(type.name));
+
+    return Markup.keyboard(buttons, { columns: 3 });
   }
 }

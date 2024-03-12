@@ -39,12 +39,25 @@ export class AddCommentScene extends BaseScene {
   }
 
   async leave(ctx: IBotContext): Promise<void> {
-    const { value, type, comment } = ctx.session.sceneData.addExpenses;
-    let _msg = `${type}: *${value}* ${ctx.session.currency ?? ''}`;
+    const { value, type, date, comment } = ctx.session.sceneData.addExpenses;
 
-    if (comment) _msg += `\n**${comment}**`;
+    if (value && type && date) {
+      await this._prisma.createExpense(
+        value,
+        ctx.session.user.id,
+        type.id,
+        date,
+        comment,
+      );
 
-    await ctx.replyWithMarkdownV2(_msg, defaultKeyboard);
+      let _msg = `${date.toLocaleDateString()} \\- *${value}* **${type.name}**`;
+
+      if (comment) _msg += `\n**${comment}**`;
+
+      await ctx.replyWithMarkdownV2(_msg, defaultKeyboard);
+    }
+
+    ctx.session.sceneData.addExpenses = {};
     await super.leave(ctx);
   }
 
