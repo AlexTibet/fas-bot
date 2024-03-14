@@ -68,57 +68,63 @@ export class GetExpensesScene extends BaseScene {
 
   async todayHandler(ctx: IBotContext): Promise<void> {
     const today = this.getToday();
-    const answer = await this.getAnswer(ctx.session.user.id, { gte: today });
+    const answers = await this.getAnswers(ctx.session.user.id, { gte: today });
 
-    await ctx.replyWithMarkdownV2(answer);
+    await this.sendAnswer(ctx, answers);
   }
 
   async yesterdayHandler(ctx: IBotContext): Promise<void> {
     const today = this.getToday();
     const yesterday = this.getYesterday(today);
 
-    const answer = await this.getAnswer(ctx.session.user.id, {
+    const answers = await this.getAnswers(ctx.session.user.id, {
       gte: yesterday,
       lte: today,
     });
 
-    await ctx.replyWithMarkdownV2(answer);
+    await this.sendAnswer(ctx, answers);
   }
 
   async weekHandler(ctx: IBotContext): Promise<void> {
     const today = this.getToday();
     const weekAgo = this.getWeekAgo(today);
 
-    const answer = await this.getAnswer(ctx.session.user.id, {
+    const answers = await this.getAnswers(ctx.session.user.id, {
       gte: weekAgo,
       lte: today,
     });
 
-    await ctx.replyWithMarkdownV2(answer);
+    await this.sendAnswer(ctx, answers);
   }
 
   async monthHandler(ctx: IBotContext): Promise<void> {
     const today = this.getToday();
     const monthAgo = this.getMonthAgo(today);
 
-    const answer = await this.getAnswer(ctx.session.user.id, {
+    const answers = await this.getAnswers(ctx.session.user.id, {
       gte: monthAgo,
       lte: today,
     });
 
-    await ctx.replyWithMarkdownV2(answer);
+    await this.sendAnswer(ctx, answers);
   }
 
   async yearHandler(ctx: IBotContext): Promise<void> {
     const today = this.getToday();
     const yearAgo = this.getYearAgo(today);
 
-    const answer = await this.getAnswer(ctx.session.user.id, {
+    const answers = await this.getAnswers(ctx.session.user.id, {
       gte: yearAgo,
       lte: today,
     });
 
-    await ctx.replyWithMarkdownV2(answer);
+    await this.sendAnswer(ctx, answers);
+  }
+
+  private async sendAnswer(ctx: IBotContext, answers: string[]): Promise<void> {
+    for await (const answer of answers) {
+      await ctx.replyWithMarkdownV2(answer);
+    }
   }
 
   private getToday(): Date {
@@ -130,6 +136,7 @@ export class GetExpensesScene extends BaseScene {
 
     return new Date(`${month}.${day}.${year}`);
   }
+
   private getYesterday(today: Date): Date {
     const date = new Date(today);
 
@@ -154,13 +161,13 @@ export class GetExpensesScene extends BaseScene {
     return new Date(date.setFullYear(date.getFullYear() - 1));
   }
 
-  private async getAnswer(
+  private async getAnswers(
     userId: string,
     filter: {
       gte: Date;
       lte?: Date;
     },
-  ): Promise<string> {
+  ): Promise<string[]> {
     const where = {
       userId,
       date: {
@@ -171,6 +178,7 @@ export class GetExpensesScene extends BaseScene {
 
     const expenses = await this._prisma.client.expense.findMany({
       where,
+      orderBy: { date: 'desc' },
       include: { type: true },
     });
 
@@ -186,6 +194,17 @@ export class GetExpensesScene extends BaseScene {
       return msg + (e.comment ?? '');
     });
 
-    return `Сумма: ${data._sum.value || 0}\n` + answerArray.join('\n') || '';
+    const answer = [`Сумма: ${data._sum.value || 0}\n`];
+
+    const batchSize = 100;
+    const numBatches = Math.ceil(answerArray.length / batchSize);
+
+    for (let i = 0; i < numBatches; i++) {
+      const batch = answerArray.slice(i * batchSize, (i + 1) * batchSize);
+
+      answer.push(batch.join('\n'));
+    }
+
+    return answer;
   }
 }
