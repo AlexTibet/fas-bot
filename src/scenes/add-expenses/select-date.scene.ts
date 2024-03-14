@@ -8,7 +8,7 @@ import { BaseScene } from '../base.scene';
 
 import { AddExpensesSceneNames } from './add-expenses.constants';
 
-enum CallbackNames {
+enum SelectDateCallbackNames {
   TODAY_DATE = 'today_callback',
   SELECT_DATE = 'select_date_callback',
 }
@@ -28,11 +28,13 @@ export class SelectDateScene extends BaseScene {
   protected async enter(ctx: IBotContext): Promise<void> {
     await super.enter(ctx);
 
-    this._scene.action(CallbackNames.TODAY_DATE, async (ctx: IBotContext) =>
-      this.todayHandler(ctx),
+    this._scene.action(
+      SelectDateCallbackNames.TODAY_DATE,
+      async (ctx: IBotContext) => this.todayHandler(ctx),
     );
-    this._scene.action(CallbackNames.SELECT_DATE, async (ctx: IBotContext) =>
-      this.selectDateHandler(ctx),
+    this._scene.action(
+      SelectDateCallbackNames.SELECT_DATE,
+      async (ctx: IBotContext) => this.selectDateHandler(ctx),
     );
 
     const keyboard = this.createSelectDateSceneKeyboard();
@@ -68,8 +70,8 @@ export class SelectDateScene extends BaseScene {
   private createSelectDateSceneKeyboard(): Markup.Markup<InlineKeyboardMarkup> {
     return Markup.inlineKeyboard(
       [
-        Markup.button.callback('Сегодня', CallbackNames.TODAY_DATE),
-        Markup.button.callback('Другая', CallbackNames.SELECT_DATE),
+        Markup.button.callback('Сегодня', SelectDateCallbackNames.TODAY_DATE),
+        Markup.button.callback('Другая', SelectDateCallbackNames.SELECT_DATE),
       ],
       { columns: 2 },
     );
