@@ -10,6 +10,11 @@ import { AddExpensesSceneNames } from './add-expenses.constants';
 
 const COMMENT_MAX_LENGTH = 100;
 
+enum AddCommentCallbackNames {
+  AddComment = 'add_comment_callback',
+  NotComment = 'not_comment_callback',
+}
+
 export class AddCommentScene extends BaseScene {
   constructor() {
     super(AddExpensesSceneNames.ADD_COMMENT);
@@ -26,11 +31,13 @@ export class AddCommentScene extends BaseScene {
     await super.enter(ctx);
     const keyboard = this.createCommentSceneKeyboard();
 
-    this._scene.action('add_comment_callback', async (ctx: IBotContext) =>
-      this.addCommentHandler(ctx),
+    this._scene.action(
+      AddCommentCallbackNames.AddComment,
+      async (ctx: IBotContext) => this.addCommentHandler(ctx),
     );
-    this._scene.action('not_comment_callback', async (ctx: IBotContext) =>
-      this.notCommentHandler(ctx),
+    this._scene.action(
+      AddCommentCallbackNames.NotComment,
+      async (ctx: IBotContext) => this.notCommentHandler(ctx),
     );
 
     const _msg = await ctx.reply('Добавить комментарий?', keyboard);
@@ -80,8 +87,8 @@ export class AddCommentScene extends BaseScene {
   private createCommentSceneKeyboard(): Markup.Markup<InlineKeyboardMarkup> {
     return Markup.inlineKeyboard(
       [
-        Markup.button.callback('Да', 'add_comment_callback'),
-        Markup.button.callback('Нет', 'not_comment_callback'),
+        Markup.button.callback('Да', AddCommentCallbackNames.AddComment),
+        Markup.button.callback('Нет', AddCommentCallbackNames.NotComment),
       ],
       { columns: 2 },
     );

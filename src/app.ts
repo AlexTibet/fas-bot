@@ -5,8 +5,7 @@ import { IBotContext, ISessionData } from './context/context.interface';
 import { ICommand } from './commands/command.interface';
 import { StartCommand } from './commands/start/start.command';
 
-import { AddExpensesStage } from './scenes/add-expenses/add.expenses.stage';
-import { IStage } from './scenes/stage.interface';
+import { Stage } from './scenes/stage';
 
 import CONFIG_TYPES from './config/config.types';
 import { IConfigService } from './config/config.service.interface';
@@ -47,12 +46,9 @@ class App {
     );
 
     // Add stages
-    const stages: IStage[] = [new AddExpensesStage()];
+    const stage = new Stage();
 
-    for (const stage of stages) {
-      bot.use(stage.middleware());
-      this._loggerService.info(`Add stage: ${stage.name}`);
-    }
+    bot.use(stage.middleware());
 
     // Add commands
     const commands: ICommand[] = [new StartCommand(bot)];

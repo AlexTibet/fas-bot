@@ -15,6 +15,12 @@ import UTILS_TYPES from '../../utils/utils.types';
 import { defaultKeyboard } from '../../utils/default.keyboard';
 
 import { Command } from '../command';
+import { GetExpensesSceneNames } from '../../scenes/get-expenses/get-expenses.constants';
+
+enum StartCommandCallbackNames {
+  ADD_EXPENSES = 'add_expenses_callback',
+  GET_EXPENSES = 'get_expenses_callback',
+}
 
 export class StartCommand extends Command {
   public readonly name = StartCommand.name;
@@ -29,9 +35,18 @@ export class StartCommand extends Command {
 
   handle(): void {
     this.bot.start(async (ctx: IBotContext) => this.process(ctx));
-    this.bot.action('add_expenses_callback', async (ctx: IBotContext) => {
-      await ctx.scene.enter(AddExpensesSceneNames.ADD_VALUE);
-    });
+    this.bot.action(
+      StartCommandCallbackNames.ADD_EXPENSES,
+      async (ctx: IBotContext) => {
+        await ctx.scene.enter(AddExpensesSceneNames.ADD_VALUE);
+      },
+    );
+    this.bot.action(
+      StartCommandCallbackNames.GET_EXPENSES,
+      async (ctx: IBotContext) => {
+        await ctx.scene.enter(GetExpensesSceneNames.SELECT_FILTER);
+      },
+    );
   }
 
   private async process(ctx: IBotContext): Promise<void> {
@@ -59,8 +74,14 @@ export class StartCommand extends Command {
   private createStartKeyboard(): Markup.Markup<InlineKeyboardMarkup> {
     return Markup.inlineKeyboard(
       [
-        Markup.button.callback('Добавить расходы', 'add_expenses_callback'),
-        Markup.button.callback('Показать расходы', 'get_expenses_callback'),
+        Markup.button.callback(
+          'Добавить расходы',
+          StartCommandCallbackNames.ADD_EXPENSES,
+        ),
+        Markup.button.callback(
+          'Показать расходы',
+          StartCommandCallbackNames.GET_EXPENSES,
+        ),
       ],
       { columns: 1 },
     );
